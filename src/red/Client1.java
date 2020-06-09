@@ -21,9 +21,9 @@ public class Client1 {
             System.out.println("Cliente conectado");
 
             // Crea el PrintWriter para enviar un mensaje al servidor
-            PrintWriter pw = new PrintWriter(socket.getOutputStream(), true);
-
+            PrintWriter pw = new PrintWriter(socket.getOutputStream());
             pw.println("Hola desde el Cliente !!!");
+            pw.flush();
             System.out.println("Mensaje enviado");
             
             socket.close();
