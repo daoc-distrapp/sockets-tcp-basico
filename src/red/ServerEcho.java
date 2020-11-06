@@ -1,75 +1,60 @@
 package red;
 
-import java.net.*;
 import java.util.Scanner;
-import java.io.*;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.ServerSocket;
+import java.net.Socket;
 
 /**
- * 
+ * https://github.com/dordonez-ute-apdist/sockets-tcp-basico
  * @author dordonez@ute.edu.ec
  */
 public class ServerEcho {
-    private int puerto = 8888;
-    
-    public ServerEcho(){
-    }
-    
-    public ServerEcho(int puerto) {
-        this.puerto = puerto;
-    }
+    private static final int PUERTO = 8888;
 
+    public static void main(String[] args) throws Exception {
+        ServerEcho servidor = new ServerEcho();
+        servidor.escuchar();
+    }    
+    
     public void escuchar() {
         try {
-            // Crea el socket y escucha por conexiones
-            ServerSocket serverSocket = new ServerSocket(puerto);
+            // Crea el ServerSocket y espera conexiones
+            ServerSocket serverSocket = new ServerSocket(PUERTO);
             System.out.println("Server iniciado (cierre con Ctrl+C)");
 
             // Maneja las conexiones
             while (true) {
-                System.out.println("Server esperando conexion");
+                System.out.println("Server esperando conexión");
                 Socket socket = serverSocket.accept();
-                System.out.println("Conexion aceptada");
+                System.out.println("Conexión aceptada desde: " + socket.getRemoteSocketAddress());
 
                 // Crea el Scanner para recibir mensajes del cliente
-                Scanner scanner = new Scanner(socket.getInputStream());
+                Scanner scan = new Scanner(socket.getInputStream());
 
                 // Crea el PrintWriter para enviar mensajes al cliente
                 PrintWriter pw = new PrintWriter(socket.getOutputStream(), true);
 
-                pw.println("Conectado a ServerEcho. Escriba EXIT para salir.");
                 boolean done = false;
-                while (!done && scanner.hasNextLine()) {
-                    String line = scanner.nextLine();
-                    if (line.trim().equals("EXIT")) {
-                        pw.println("Close: ServerEcho cerrando conexion");
-                        System.out.println("EXIT solicitado");
+                while (!done) {
+                	//Lee mensaje del socket y responde un "echo"
+                    String line = scan.nextLine();
+                	System.out.println("Recibido:" + line + "; desde: " + socket.getRemoteSocketAddress());
+                    pw.println("Echo: " + line.toUpperCase());                    
+                    
+                    if (line.trim().equalsIgnoreCase("EXIT")) {
+                        System.out.println("Server cerrando conexión con: " + socket.getRemoteSocketAddress());
                         done = true;
-                    } else {
-                        pw.println("Echo: " + line);
-                        System.out.println("Echo enviado");
-                    }
+                    } 
                 }
 
                 // Cierra el socket
                 socket.close();
-                System.out.println("Conexion cerrada");
             }
-        } catch(Exception e) {
+        } catch(IOException e) {
             e.printStackTrace();
-        }
-    }
-    
-    /**
-     * @param args puerto de escucha default es 8888
-     */
-    public static void main(String[] args) throws Exception {
-        ServerEcho servidor;
-        if(args.length > 0) {
-            servidor = new ServerEcho(Integer.parseInt(args[0]));
-        } else {
-            servidor = new ServerEcho();
-        }
-        servidor.escuchar();
+        } 
     }
     
 }
